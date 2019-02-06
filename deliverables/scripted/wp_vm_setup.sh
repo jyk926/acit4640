@@ -1,4 +1,5 @@
 vboxmanage () { VBoxManage.exe "$@"; }
+
 # get the absolute path of the current script 
 declare script_path="$(python -c "import os; print(os.path.realpath('$0'))")"
 
@@ -19,36 +20,47 @@ declare vm_directory="$(dirname "${vm_conf_file}")"
 
 echo "${vm_directory}"
 
-declare cidr_bits="24"
-declare network_name="sys_net_prov"
-declare global_ip=[]
-declare local_ip="192.168.254.10"
-declare protocol="tcp"
-declare global_port="80"
-declare local_port="50080"
-vboxmanage natnetwork add \
-            --netname ${network_name} \
-            --network "192.168.254.0/${cidr_bits}" \
-            --dhcp off 
-
-vboxmanage natnetwork modify \
-            --netname ${network_name} 
-            --port-forward-4 "rule1:${protocol}:[${global_ip}]:${global_port}:[${local_ip}]:${local_port}"
+declare vm_folder="testVM"
+declare size_in_mb="3600"
+declare ctrlr_1="ctrl1"
+declare ctrlr_2="ctrl2"
+declare group_name=""
+declare memory_mb="1280"
+declare iso_file_path="/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso"
 
 vboxmanage list natnetworks
-vboxmanage natnetwork remove --netname ${network_name}
+
 vboxmanage natnetwork remove --netname ${network_name}
 
-vboxmanage createhd --filename ${vm_folder}/${vm_name}.vdi \
+vboxmanage createvm --name ${vm_name} --register
+
+vboxmanage createhd --filename "/"/${vm_name}.vdi \
                     --size ${size_in_mb} -variant Standard
-vboxmanage storagectl ${vm_name} --name "controller1" --add "ide" --bootable on //ide
-vboxmanage storagectl ${vm_name} --name "controller2" --add "sata" --bootable on //sata
+
+vboxmanage storagectl ${vm_name} --name $ctrlr_1 --add "ide" --bootable on
+vboxmanage storagectl ${vm_name} --name $ctrlr_2 --add "sata" --bootable on
+
 vboxmanage storageattach ${vm_name} \
-            --storagectl ${ctrlr_name} \ 
-            --port ${port_num} \
-            --device ${devic_num} \
+            --storagectl ${ctrlr_1} \ 
+            --port 00 \
+            --device 00 \
             --type dvddrive \
-            --medium ${iso_file_path}
+            --medium "/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso"
+vboxmanage storageattach ${vm_name} \
+            --storagectl ${ctrlr_2} \ 
+            --port 01 \
+            --device 01 \
+            --type dvddrive \
+            --medium "/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso"
+
+
+vboxmanage storageattach ${vm_name} \
+            --storagectl $ctrlr_1 \
+            --port 01 \
+            --device 01 \
+            --type hdd \
+            --medium "/Users/Min/VirtualBox VMs/test"/${vm_name}.vdi \
+            --nonrotational on
 
 vboxmanage modifyvm ${vm_name}\
             --groups "${group_name}"\

@@ -4,21 +4,14 @@ declare cidr_bits="24"
 declare rule_name1="ssh_wp"
 declare rule_name2="http_wp"
 declare rule_name3="ssl_wp"
-declare protocol="tcp"
-declare global_ip =""
-declare local_ip ="192.168.1.5"
+
 
 vboxmanage natnetwork add \
             --netname ${network_name} \
             --network "${network_address}/${cidr_bits}" \
             --dhcp off 
 
-vboxmanage natnetwork modify \
-            --netname ${network_name} 
-            --port-forward-4 "${rule_name1}:${protocol}:[${global_ip}]:'50022':[${local_ip}]:'22'"
-vboxmanage natnetwork modify \
-            --netname ${network_name} 
-            --port-forward-4 "${rule_name2}:${protocol}:[${global_ip}]:'50080':[${local_ip}]:'80'"
-vboxmanage natnetwork modify \
-            --netname ${network_name} 
-            --port-forward-4 "${rule_name3}:${protocol}:[${global_ip}]:'50443':[${local_ip}]:443"
+VBoxManage natnetwork modify --netname ${network_name} --port-forward-4 "ssh_wp:tcp:[]:50022:[192.168.254.10]:22"
+VBoxManage natnetwork modify --netname ${network_name} --port-forward-4 "http_wp:tcp:[]:50080:[192.168.254.10]:80"
+VBoxManage natnetwork modify --netname ${network_name} --port-forward-4 "ssl_wp:tcp:[]:50443:[192.168.254.10]:443"
+VBoxManage list natnetworks
