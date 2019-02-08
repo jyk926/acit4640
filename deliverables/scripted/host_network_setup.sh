@@ -1,5 +1,5 @@
 declare network_name="sys_net_prov" #Name of network
-declare network_address="192.168.1.0" #Address of network
+declare network_address="192.168.254.0" #Address of network
 declare cidr_bits="24" #CIDR bits for network address
 declare rule_name1="ssh_wp" #SSH forwarding rule
 declare rule_name2="http_wp" #HTTP forwarding rule
